@@ -1,6 +1,6 @@
 ---
-title: "Geography of the 2023 rugby world cup"
-subtitle: "Where are rugby players coming from?"
+title: "Mapping the 2023 Rugby World Cup"
+subtitle: "Rugby, a global game?"
 author: "Julien Migozzi, PhD"
 institute: "University of Oxford"
 format:
@@ -11,11 +11,13 @@ editor_options:
   chunk_output_type: console
 ---
 
-These interactive maps display the place of birth of players participating in the 2023 Rugby World Cup.
+These interactive maps display the place of birth of each player participating in the 2023 Rugby World Cup*.
 
-The data was sourced from Wikipedia and is therefore sometimes incomplete.
+While 20 teams participate in the competition, these international players come from a total of 33 countries!
 
 Enjoy the exploration - and Allez les Bleus !
+
+
 
 ```{r}
 #| echo: false
@@ -35,8 +37,6 @@ wc <- wc %>% mutate(club = ifelse(is.na(franchise_province), club_province,franc
   relocate(player, team, position, club, country) %>% 
   select(-c(franchise_province,club_province ))
 wc$size <- 100
-# glimpse(xv)
-
 
 # Parameters for OJS
 ojs_define(wc_str = sf_geojson(wc))
@@ -225,7 +225,7 @@ Plot.plot({
 
 ### List of players
 
-The table displays only players for which the place of birth was mentioned on wikipedia.
+The table displays only players for which the place of birth was available on Wikipedia.
 
 ```{ojs}
 Inputs.table(data1,)
@@ -233,7 +233,9 @@ Inputs.table(data1,)
 
 ```
 
-# Some stats
+# Some general stats of the RWC
+
+These numbers should be taken with caution due to missing data, especially for a few teams (see below)
 
 ```{r}
 #| echo: false
@@ -269,7 +271,7 @@ ggplot(., aes(reorder(team, pct), pct)) +
   coord_flip() +
   theme_ipsum() + 
   scale_y_percent() +
-  labs(subtitle = "Percentage of foreign-born players per team.\nThis is an approximation due to missing data (see below)") +
+  labs(subtitle = "Percentage of foreign-born players per team") +
   xlab("Team") +
   ylab("Percentage of squad") +
   theme(axis.text.y = element_text(size = 8))    
@@ -279,7 +281,11 @@ ggplot(., aes(reorder(team, pct), pct)) +
 
 ### Quality of information
 
-When available, the place of birth was extracted from [Wikipedia](https://en.wikipedia.org/wiki/2023_Rugby_World_Cup_squads), then geocoded with OpenStreetMap. 591 players have been geocoded for a total of 675 players. Data is incomplete for a few countries, especially for Chili and Portugal: sometimes there is no wikipedia page for the player, or the place of birth is not mentioned.
+*The data was sourced from Wikipedia and is sometimes incomplete.
+
+When available, the place of birth was extracted from [this page](https://en.wikipedia.org/wiki/2023_Rugby_World_Cup_squads), then geocoded with OpenStreetMap. 591 players have been geocoded for a total of 675 players.
+
+Data is incomplete for a few countries, especially for Chili and Portugal: sometimes there is no wikipedia page for the player, or the place of birth is not mentioned.
 
 ```{r}
 #| echo: false
