@@ -1,0 +1,310 @@
+---
+title: "Geography of the 2023 rugby world cup"
+subtitle: "Where are rugby players coming from?"
+author: "Julien Migozzi, PhD"
+institute: "University of Oxford"
+format:
+  html:
+    echo: false
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+These interactive maps display the place of birth of players participating in the 2023 Rugby World Cup.
+
+The data was sourced from Wikipedia and is therefore sometimes incomplete.
+
+Enjoy the exploration - and Allez les Bleus !
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(sf)
+library(geojsonsf)
+library(leaflet)
+library(tidyverse)
+library(hrbrthemes)
+
+wc <- st_read(here::here("data/worldcupsquads.gpkg"),  quiet = TRUE)
+
+wc <- wc %>%  st_jitter(factor = 0.00003) # avoid overlapping of points
+wc <- wc %>% mutate(club = ifelse(is.na(franchise_province), club_province,franchise_province )) %>% 
+  relocate(player, team, position, club, country) %>% 
+  select(-c(franchise_province,club_province ))
+wc$size <- 100
+# glimpse(xv)
+
+
+# Parameters for OJS
+ojs_define(wc_str = sf_geojson(wc))
+
+
+```
+
+# All players
+
+```{r}
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
+leaflet(wc) %>%
+  addProviderTiles("CartoDB.Positron") %>% 
+  addCircles(radius = ~size, label =   ~paste0(player, ",", team)) 
+```
+
+```{ojs}
+//| echo: false
+//| eval: true
+players = JSON.parse(wc_str) 
+import {view} from "@neocartocnrs/geoverview"
+geo = require("geotoolbox@latest")
+bertin = require("bertin")
+cartoLight = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png"
+cartoAttr = `&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>`
+```
+
+```{ojs}
+//| echo: false
+//| eval: false
+
+VanCircleFoodMap = {
+
+  let width = 800;
+  let container = DOM.element('div', { style: `width:${width}px;height:${width/1.6}px` });
+  
+  yield container;
+  
+  // Did not use setView because we are using "fit bounds" to get the polygons to determine this
+  let map = L.map(container);
+
+  //add base layer
+  let baseLayer = L.tileLayer(cartoLight, {
+   attribution: cartoAttr,
+    subdomains: 'abcd',
+    maxZoom: 20,
+    minZoom: 0
+  }).addTo(map); 
+
+  //geoMarker obj
+  let geojsonMarkerOptions = {
+    radius: 5,
+    fillColor: ~team,
+    color: "#ff7800",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.6
+  };
+
+  //passing a pointToLayer function in a GeoJSON options object when creating the GeoJSON layer. 
+  //This function is passed a LatLng and should return an instance of ILayer, in this case likely a Marker or CircleMarker.
+  //we use arrow notation here, but this essentially is the same as using an anonymous function like so: function (feature, latlng){...return stuff}
+  let VanAreasLayer = L.geoJSON(players, {
+      pointToLayer: (feature, latlng) => {
+        return L.circleMarker(latlng, geojsonMarkerOptions);
+    }})
+  .bindPopup(function (Layer) { 
+    return Layer.feature.properties.player +
+    '<br> Place of birth: ' + Layer.feature.properties.birth_info +
+    '<br> Position: ' + Layer.feature.properties.position +
+    '<br> Team: ' + Layer.feature.properties.team; 
+  })  
+  .addTo(map);
+
+
+  //finds bounds of polygon and automatically gets map view to fit
+  map.fitBounds(VanAreasLayer.getBounds()); 
+  
+}
+
+
+
+
+```
+
+# Select a team
+
+### Map of players
+
+```{ojs}
+//| echo: false
+
+viewof text = Inputs.select([ "New Zealand", "France" ,  "Italy",     "Uruguay" , "Namibia"  , "South Africa", "Ireland" ,  "Tonga"  ,  "Romania" ,  "Wales",  "Australia","Fiji"  , "Georgia" ,"Portugal", "England", "Scotland",   "Japan" , "Argentina",  "Samoa", "Chile"], {value: "France", label: "Select a team:", sort: true})
+
+
+newplayers = geo.filter(players, (d) => d.team ==  text)
+
+
+VanCircleFoodMap2 = {
+
+  let width = 800;
+  let container = DOM.element('div', { style: `width:${width}px;height:${width/1.6}px` });
+  
+  yield container;
+  
+  // Did not use setView because we are using "fit bounds" to get the polygons to determine this
+  let map = L.map(container);
+
+  //add base layer
+  let baseLayer = L.tileLayer(cartoLight, {
+   attribution: cartoAttr,
+    subdomains: 'abcd',
+    maxZoom: 20,
+    minZoom: 0
+  }).addTo(map); 
+
+  //geoMarker obj
+  let geojsonMarkerOptions = {
+    radius: 5,
+    fillColor: "#ff7800",
+    color: "#ff7800",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.6
+  };
+
+  //passing a pointToLayer function in a GeoJSON options object when creating the GeoJSON layer. 
+  //This function is passed a LatLng and should return an instance of ILayer, in this case likely a Marker or CircleMarker.
+  //we use arrow notation here, but this essentially is the same as using an anonymous function like so: function (feature, latlng){...return stuff}
+  let VanAreasLayer = L.geoJSON(newplayers, {
+      pointToLayer: (feature, latlng) => {
+        return L.circleMarker(latlng, geojsonMarkerOptions);
+    }})
+  .bindPopup(function (Layer) { 
+    return Layer.feature.properties.player +
+    '<br> Place of birth: ' + Layer.feature.properties.birth_info +
+    '<br> Position: ' + Layer.feature.properties.position +
+    '<br> Team: ' + Layer.feature.properties.team; 
+  })  
+  .addTo(map);
+
+
+  //finds bounds of polygon and automatically gets map view to fit
+  map.fitBounds(VanAreasLayer.getBounds()); 
+  
+}
+
+data1 = geo.table(newplayers)
+
+
+
+
+```
+
+### Composition of the squad
+
+```{ojs}
+
+
+Plot.plot({
+  width: 800,
+  height: 500,
+  marginTop: 50,
+  marginLeft: 100,
+  marginBottom: 10,
+  x: {
+  label: "Country of birth", 
+  axis: "top",
+  tip: true,
+  tickRotate: 0
+  },
+  y: {
+  label: "Number of players",
+  grid: true
+  },
+  marks: [
+      Plot.barX(data1, Plot.groupY({x: "count"}, {y: "country", sort: {y: "x", reverse: true}})),
+
+    Plot.ruleY([0])
+  ]
+})
+```
+
+### List of players
+
+The table displays only players for which the place of birth was mentioned on wikipedia.
+
+```{ojs}
+Inputs.table(data1,)
+
+
+```
+
+# Some stats
+
+```{r}
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
+wc %>% 
+  st_set_geometry(NULL) %>% 
+  group_by(country) %>% 
+  count() %>% 
+  ggplot(., aes(reorder(country, n), n)) +
+  geom_col() + 
+  coord_flip() +
+  theme_ipsum() + 
+  labs(subtitle = "Which country is the most represented at the 2023 RWC?") +
+  xlab("Country of birth") +
+  ylab("Number of players") +
+  theme(axis.text.y = element_text(size = 8))  
+
+
+wc %>% 
+  st_set_geometry(NULL) %>% 
+  mutate(foreign = ifelse(team == country, "no", "yes")) %>% 
+  group_by(team, foreign) %>% 
+   count() %>% 
+  ungroup() %>% 
+   group_by(team) %>% 
+  mutate(pct = n/sum(n, na.rm = T)) %>% 
+  filter(foreign == "yes" | pct == 1) %>%
+  filter(!is.na(team)) %>% 
+ggplot(., aes(reorder(team, pct), pct)) +
+  geom_col() + 
+  coord_flip() +
+  theme_ipsum() + 
+  scale_y_percent() +
+  labs(subtitle = "Percentage of foreign-born players per team.\nThis is an approximation due to missing data (see below)") +
+  xlab("Team") +
+  ylab("Percentage of squad") +
+  theme(axis.text.y = element_text(size = 8))    
+
+
+```
+
+### Quality of information
+
+When available, the place of birth was extracted from [Wikipedia](https://en.wikipedia.org/wiki/2023_Rugby_World_Cup_squads), then geocoded with OpenStreetMap. 591 players have been geocoded for a total of 675 players. Data is incomplete for a few countries, especially for Chili and Portugal: sometimes there is no wikipedia page for the player, or the place of birth is not mentioned.
+
+```{r}
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
+
+all_squad <- read.csv(here::here("data/geocoded_squad_rwc_players.csv"))
+all_squad %>% 
+  mutate(pob = ifelse(is.na(lat), "no", "yes")) %>% 
+  group_by(team, pob) %>% 
+  count() %>% 
+  ungroup() %>% 
+   group_by(team) %>% 
+  mutate(pct = n/sum(n, na.rm = T)) %>% 
+  filter(pob == "yes") %>%
+  filter(!is.na(team)) %>% 
+  ggplot(., aes(reorder(team, pct), pct)) +
+  geom_col() + 
+  coord_flip() +
+  theme_ipsum() + 
+  scale_y_percent() +
+  labs(subtitle = "Geolocation: level of completeness per team") +
+  xlab("Team") +
+  ylab("Percentage of squad that was geolocated") +
+  theme(axis.text.y = element_text(size = 8))    
+  
+```
