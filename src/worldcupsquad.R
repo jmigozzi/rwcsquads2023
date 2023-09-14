@@ -233,7 +233,7 @@ players_sf <- all_data_geo %>%
   filter(!is.na(long)) %>% # remove players without pob
    st_as_sf(coords = c("long", "lat"), crs = 4326) #%>% 
 #st_jitter(factor = 0.00002) # avoid overlapping of points
-mapview(players_sf)
+
 
 
 #6. Save spatial data ----

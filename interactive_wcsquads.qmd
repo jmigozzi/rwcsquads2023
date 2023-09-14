@@ -275,16 +275,16 @@ wc %>%
   mutate(pct = n/sum(n, na.rm = T)) %>% 
   filter(foreign == "yes" | pct == 1) %>%
   filter(!is.na(team)) %>% 
+  mutate(pct = ifelse(pct == 1, 0, pct)) %>% 
 ggplot(., aes(reorder(team, pct), pct)) +
   geom_col() + 
   coord_flip() +
   theme_ipsum() + 
-  scale_y_percent() +
+  scale_y_percent(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
   labs(subtitle = "Percentage of foreign-born players per team") +
   xlab("Team") +
   ylab("Percentage of squad") +
   theme(axis.text.y = element_text(size = 8))    
-
 
 ```
 
