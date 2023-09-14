@@ -28,8 +28,9 @@ library(sf)
 library(geojsonsf)
 library(leaflet)
 library(tidyverse)
+library(mapview)
 library(hrbrthemes)
-
+library(leafpop)
 wc <- st_read(here::here("data/worldcupsquads.gpkg"),  quiet = TRUE)
 
 wc <- wc %>%  st_jitter(factor = 0.00003) # avoid overlapping of points
@@ -51,9 +52,17 @@ ojs_define(wc_str = sf_geojson(wc))
 #| eval: true
 #| warning: false
 #| message: false
-leaflet(wc) %>%
-  addProviderTiles("CartoDB.Positron") %>% 
-  addCircles(radius = ~size, label =   ~paste0(player, ",", team)) 
+# leaflet(wc) %>%
+#   addProviderTiles("CartoDB.Positron") %>% 
+#   addCircles(radius = ~size, label =   ~paste0(player, ",", team)) 
+
+wc_for_map <- wc  %>% select(player, team, position) %>% filter(!is.na(team)) %>% 
+  mutate(label = paste0(player, ", ", team, ",\n", position))
+mapview(wc_for_map, zcol = "team", legend = F, label = "label")
+        # popup = popupTable(wc_for_map,
+        #                               zcol = c("player",
+        #                                        "team",
+        #                                        "position")))
 ```
 
 ```{ojs}

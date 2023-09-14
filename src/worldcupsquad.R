@@ -211,15 +211,27 @@ all_data_geo <-  all_data_geo %>%
   mutate(lat = case_when(grepl("Tsholomnqa", birth_info) ~ -33.16119, # no geocoding
                          TRUE~ lat) ) 
 
+all_data_geo <- all_data_geo %>% 
+  mutate(long = case_when(grepl("Auckland", birth_info) ~  174.763336, 
+                          TRUE~ long) ) %>% 
+  mutate(lat = case_when(grepl("Auckland", birth_info) ~ -36.848461, # wrong geocoding
+                         TRUE~ lat) ) 
+
 #Save file
 write.csv(all_data_geo, "data/geocoded_squad_rwc_players.csv", row.names = F)
 
+
+all_data_geo <-  read.csv("data/geocoded_squad_rwc_players.csv")
+
+
+
+
 #5. Quick EDA with mapview ----
 
-
+library(mapview)
 players_sf <- all_data_geo %>% 
   filter(!is.na(long)) %>% # remove players without pob
-   st_as_sf(coords = c("long", "lat"), crs = 4326) # %>% 
+   st_as_sf(coords = c("long", "lat"), crs = 4326) #%>% 
 #st_jitter(factor = 0.00002) # avoid overlapping of points
 mapview(players_sf)
 
