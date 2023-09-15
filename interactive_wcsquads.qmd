@@ -11,9 +11,12 @@ editor_options:
   chunk_output_type: console
 ---
 
-These interactive maps display the place of birth of each player participating in the 2023 Rugby World Cup*.
+These interactive maps display the place of birth of each player participating in the 2023 Rugby World Cup*: 
 
-While 20 teams participate in the competition, these international players come from a total of 33 countries!
+- The first map displays all players 
+- the second displays players for the selected team, with a few stats.
+
+If 20 teams participate in the competition, these international players come from a total of 33 countries. 
 
 Enjoy the exploration - and Allez les Bleus !
 
