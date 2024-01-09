@@ -73,7 +73,7 @@ mapview(wc_for_map, zcol = "team", legend = F, label = "label")
 //| eval: true
 players = JSON.parse(wc_str) 
 import {view} from "@neocartocnrs/geoverview"
-geo = require("geotoolbox@latest")
+geo = require("geotoolbox@2")
 bertin = require("bertin")
 cartoLight = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png"
 cartoAttr = `&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>`
@@ -91,14 +91,21 @@ VanCircleFoodMap = {
   yield container;
   
   // Did not use setView because we are using "fit bounds" to get the polygons to determine this
-  let map = L.map(container);
+  let map = L.map(container, {
+  
+  maxBounds:[[-90,-180],[90,180]]
+ 
+});
 
   //add base layer
   let baseLayer = L.tileLayer(cartoLight, {
    attribution: cartoAttr,
     subdomains: 'abcd',
     maxZoom: 20,
-    minZoom: 0
+    minZoom: 0,
+    noWrap: true
+    
+
   }).addTo(map); 
 
   //geoMarker obj
@@ -199,7 +206,7 @@ VanCircleFoodMap2 = {
   
 }
 
-data1 = geo.table(newplayers)
+data1 = geo.properties.table(newplayers)
 
 
 
