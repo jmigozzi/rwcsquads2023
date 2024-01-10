@@ -11,16 +11,14 @@ editor_options:
   chunk_output_type: console
 ---
 
-These interactive maps display the place of birth of each player participating in the 2023 Rugby World Cup*: 
+These interactive maps the place of birth of each player participating in the 2023 Rugby World Cup\*:
 
-- The first map displays all players 
-- the second displays players for the selected team, with a few stats.
+-   The first map displays all players;
+-   the second allows to focus on a particular team, for which a few stats and the list of players is available too.
 
-If 20 teams participate in the competition, these international players come from a total of 33 countries. 
+While 20 teams participate in the competition, players come from 33 countries, many international players represent a country different than their place of birth. This globalization of rugby reflects two main processes: the expansion of rugby through colonial networks over the 19th century, and the recent professionalization of the sport which created a global market for players since the late 1990s.
 
-Enjoy the exploration - and Allez les Bleus !
-
-
+Enjoy the exploration - and Allez les Bleus\*\* !
 
 ```{r}
 #| echo: false
@@ -300,11 +298,13 @@ ggplot(., aes(reorder(team, pct), pct)) +
 
 ### Quality of information
 
-*The data was sourced from Wikipedia and is sometimes incomplete.
+\*The data was sourced from Wikipedia and is sometimes incomplete.
 
 When available, the place of birth was extracted from [this page](https://en.wikipedia.org/wiki/2023_Rugby_World_Cup_squads), then geocoded with OpenStreetMap. 591 players have been geocoded for a total of 675 players.
 
 Data is incomplete for a few countries, especially for Chili and Portugal: sometimes there is no wikipedia page for the player, or the place of birth is not mentioned.
+
+\*\*Sadly, it not go as I hoped for. But congratulations to South Africa.
 
 ```{r}
 #| echo: false
